@@ -4,7 +4,6 @@
 	<groupId>com.teste</groupId>
 	<artifactId>webcrawler</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
 	<description>testeWC</description>
 	<build>
 		<plugins>

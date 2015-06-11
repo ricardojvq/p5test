@@ -3,6 +3,7 @@ package webc;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 import javax.xml.bind.JAXBException;
@@ -20,17 +21,18 @@ import org.jsoup.nodes.Element;
 public class CNNCrawler {
 
 	public static void main(String[] args) throws IOException, SocketTimeoutException {
-		final String cnnURL = "http://edition.cnn.com/world";
+		final String cnnURL = "http://edition.cnn.com";
 		final String cnnPrefix = "http://edition.cnn.com";
 		Connection connection = Jsoup.connect(cnnURL);
 		Document html = connection.get();
-		Elements headlines = html.select("h3.cd__headline > a[href]");
+		Elements headlines = html.select("[data-analytics=News%20+%20buzz_list-xs_article_] > a[href]");
 		Noticias newsAgg = new Noticias();
-		int count = 0;
+		int count = 1;
+		System.out.println("A carregar notícias...\n0,00%");
 		for (Element e:headlines) {
 			// Saltar se não for notícia (link começar por "2015/06/08"
 			if (e.attr("href").startsWith("/2015")) {
-				if (count > 10) break;
+				if (count > 100) break;
 				Connection c = Jsoup.connect(cnnPrefix + e.attr("href")).timeout(0);
 				Document newsHTML = c.get();
 				Noticia n = new Noticia();
@@ -45,7 +47,10 @@ public class CNNCrawler {
 				n.setCorpo(body);
 				newsAgg.getNoticia().add(n);
 			}
-			System.out.println(count);
+			int tamanhototal = headlines.size();
+			double p = (((double) count/(double) tamanhototal)*100);
+			DecimalFormat df = new DecimalFormat("##0.00");
+			System.out.println(df.format(p)+"%");
 			count++;
 		}
 
