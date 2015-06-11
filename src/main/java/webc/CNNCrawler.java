@@ -2,6 +2,8 @@ package webc;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
@@ -17,36 +19,43 @@ import org.jsoup.nodes.Element;
 
 public class CNNCrawler {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, SocketTimeoutException {
 		final String cnnURL = "http://edition.cnn.com/world";
 		final String cnnPrefix = "http://edition.cnn.com";
 		Connection connection = Jsoup.connect(cnnURL);
 		Document html = connection.get();
 		Elements headlines = html.select("h3.cd__headline > a[href]");
 		Noticias newsAgg = new Noticias();
+		int count = 0;
 		for (Element e:headlines) {
-			Connection c = Jsoup.connect(cnnPrefix + headlines.attr("href"));
-			Document newsHTML = c.get();
-			Noticia n = new Noticia();
-			n.setTitulo(e.text());
-			n.setData("01/01/1900");
-			n.setUrl(cnnPrefix + headlines.attr("href"));
-			Elements newsEl = newsHTML.select("p.zn-body__paragraph");
-			String body = "";
-			for (Element el:newsEl) {
-				body += el.text();
+			// Saltar se não for notícia (link começar por "2015/06/08"
+			if (e.attr("href").startsWith("/2015")) {
+				if (count > 10) break;
+				Connection c = Jsoup.connect(cnnPrefix + e.attr("href")).timeout(0);
+				Document newsHTML = c.get();
+				Noticia n = new Noticia();
+				n.setTitulo(e.text());
+				n.setData("data");
+				n.setUrl(cnnPrefix + e.attr("href"));
+				Elements newsEl = newsHTML.select("p.zn-body__paragraph");
+				String body = "";
+				for (Element el:newsEl) {
+					body += el.text();
+				}
+				n.setCorpo(body);
+				newsAgg.getNoticia().add(n);
 			}
-			n.setCorpo(body);
-			newsAgg.getNoticia().add(n);
+			System.out.println(count);
+			count++;
 		}
-		
+
 		try {
 			JAXBHandler.marshal(newsAgg.getNoticia(), new File("news.xml"));
 		} catch (JAXBException e1) {
-			// TODO Auto-generated catch block
+
 			e1.printStackTrace();
 		}
-		
+
 
 	}
 
