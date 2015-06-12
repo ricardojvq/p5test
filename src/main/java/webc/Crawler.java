@@ -2,9 +2,6 @@ package webc;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.text.DecimalFormat;
-import java.util.Date;
 
 import javax.xml.bind.JAXBException;
 
@@ -12,28 +9,30 @@ import jaxb.Noticia;
 import jaxb.Noticias;
 import marshall.JAXBHandler;
 
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-public class CNNCrawler {
+import utils.ProgressBar;
 
-	public static void main(String[] args) throws IOException, SocketTimeoutException {
-		final String cnnURL = "http://edition.cnn.com";
-		final String cnnPrefix = "http://edition.cnn.com";
-		Connection connection = Jsoup.connect(cnnURL);
+public class Crawler {
+	final static String cnnURL = "http://edition.cnn.com";
+	final static String cnnPrefix = "http://edition.cnn.com";
+
+	public static String crawl() throws IOException {
+
+		org.jsoup.Connection connection = Jsoup.connect(cnnURL);
 		Document html = connection.get();
 		Elements headlines = html.select("[data-analytics=News%20+%20buzz_list-xs_article_] > a[href]");
 		Noticias newsAgg = new Noticias();
-		int count = 1;
-		System.out.println("A carregar notícias...\n0,00%");
+		int count = 0;
+		System.out.println("A carregar notícias...");
 		for (Element e:headlines) {
 			// Saltar se não for notícia (link começar por "2015/06/08"
 			if (e.attr("href").startsWith("/2015")) {
 				if (count > 100) break;
-				Connection c = Jsoup.connect(cnnPrefix + e.attr("href")).timeout(0);
+				org.jsoup.Connection c = Jsoup.connect(cnnPrefix + e.attr("href")).timeout(0);
 				Document newsHTML = c.get();
 				Noticia n = new Noticia();
 				n.setTitulo(e.text());
@@ -48,20 +47,19 @@ public class CNNCrawler {
 				newsAgg.getNoticia().add(n);
 			}
 			int tamanhototal = headlines.size();
-			double p = (((double) count/(double) tamanhototal)*100);
-			DecimalFormat df = new DecimalFormat("##0.00");
-			System.out.println(df.format(p)+"%");
+			ProgressBar bar = new ProgressBar();
+			bar.update(count, tamanhototal);
 			count++;
 		}
-
+		File xmlFile = new File("news.xml");
 		try {
-			JAXBHandler.marshal(newsAgg.getNoticia(), new File("news.xml"));
+			JAXBHandler.marshal(newsAgg.getNoticia(), xmlFile);
 		} catch (JAXBException e1) {
 
 			e1.printStackTrace();
 		}
 
-
+		return XMLConverter.convertXMLFileToString("news.xml");
 	}
 
 }

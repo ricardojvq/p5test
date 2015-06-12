@@ -1,10 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.teste</groupId>
-	<artifactId>webcrawler</artifactId>
+	<groupId>pt.uc.dei.paj</groupId>
+	<artifactId>projecto5.grupo1.crawler.pedroricardo</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<description>testeWC</description>
+	<description>Web Crawler and JMS Sender</description>
 	<build>
 		<plugins>
 			<plugin>
@@ -32,7 +32,7 @@
 					<!-- will main class to MANIFEST.MF -->
 					<archive>
 						<manifest>
-							<mainClass>webc.CNNCrawler</mainClass>
+							<mainClass>jms.TopicSender</mainClass>
 						</manifest>
 					</archive>
 					<!-- will assembly the exploded dependencies within our uber jar -->

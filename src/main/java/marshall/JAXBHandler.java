@@ -30,7 +30,6 @@ public class JAXBHandler {
     }
 	
 	// Import
-	// Import
     public static List<Noticia> unmarshal(File importFile) throws JAXBException {
         Noticias news = new Noticias();
  
